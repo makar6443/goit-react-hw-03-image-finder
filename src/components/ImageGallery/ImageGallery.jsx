@@ -47,37 +47,31 @@ class ImageGallery extends Component {
 
     if (changedSearch || changedPage) {
       this.setState({ loading: true });
-      setTimeout(
-        () =>
-          fetchImages(search, page)
-            .then(({ hits, totalHits }) => {
-              if (!hits.length) {
-                return Promise.reject(
-                  new Error(`No photos for search query: ${search}`)
-                );
-              }
+      fetchImages(search, page)
+      .then(({ hits, totalHits }) => {
+        if (!hits.length) {
+          throw new Error(`No photos for search query: ${search}`)
+        }
 
-              const newImages = hits.map(
-                ({ id, tags, webformatURL, largeImageURL }) => ({
-                  id,
-                  tags,
-                  webformatURL,
-                  largeImageURL,
-                })
-              );
-              this.setState(prevState => ({
-                images: [...prevState.images, ...newImages],
-                totalHits,
-              }));
-            })
-            .catch(error => {
-              toast.error(error.message);
+        const newImages = hits.map(
+          ({ id, tags, webformatURL, largeImageURL }) => ({
+            id,
+            tags,
+            webformatURL,
+            largeImageURL,
+          })
+        );
+        this.setState(prevState => ({
+          images: [...prevState.images, ...newImages],
+          totalHits,
+        }));
+      })
+      .catch(error => {
+        toast.error(error.message);
 
-              this.setState({ totalHits: 0, error: true });
-            })
-            .finally(this.setState({ loading: false })),
-        500
-      );
+        this.setState({ totalHits: 0, error: true });
+      })
+      .finally(this.setState({ loading: false }));
     }
   }
 
